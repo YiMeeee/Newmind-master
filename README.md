@@ -1,7 +1,8 @@
 # RNewMind
 
-轻量级大语言模型，从零实现完整的 Transformer 架构及训练流程。
-基于 MiniMind 重构升级，模块化 `model/core/` 子包，新增 Pro 系列大参数配置、NTK RoPE 长文本外推、统一训练引擎与推理/评估模块。
+轻量级大语言模型，从零实现完整的 Transformer 架构及训练流程。重构升级，模块化 `model/core/` 子包，新增 Pro 系列大参数配置、NTK RoPE 长文本外推、统一训练引擎与推理/评估模块。
+
+非常彻底的重构
 
 ---
 
