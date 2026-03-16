@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextStreamer
-from model.model_minimind import MiniMindConfig, MiniMindForCausalLM
+from model.lite.rnewmind_base import RNewMindConfig, RNewMindForCausalLM
 from model.model_lora import apply_lora, load_lora
 
 warnings.filterwarnings('ignore')
@@ -30,7 +30,7 @@ def init_model(args):
         moe_path = '_moe' if args.use_moe else ''
         modes = {0: 'pretrain', 1: 'full_sft', 2: 'rlhf', 3: 'reason'}
         ckp = f'../{args.out_dir}/{modes[args.model_mode]}_{args.hidden_size}{moe_path}.pth'
-        model = MiniMindForCausalLM(MiniMindConfig(
+        model = RNewMindForCausalLM(RNewMindConfig(
             hidden_size=args.hidden_size,
             num_hidden_layers=args.num_hidden_layers,
             max_seq_len=args.max_seq_len,
@@ -44,7 +44,7 @@ def init_model(args):
         model_path = '../MiniMind2'
         model = AutoModelForCausalLM.from_pretrained(model_path, trust_remote_code=True)
         tokenizer = AutoTokenizer.from_pretrained(model_path)
-    print(f'MiniMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
+    print(f'RNewMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
     return model.eval().to(device), tokenizer
 
 
@@ -162,7 +162,7 @@ async def chat_completions(request: ChatRequest):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Server for MiniMind")
+    parser = argparse.ArgumentParser(description="Server for RNewMind")
     parser.add_argument('--out_dir', default='out', type=str)
     parser.add_argument('--lora_name', default='None', type=str)
     parser.add_argument('--hidden_size', default=768, type=int)

@@ -16,7 +16,7 @@ from torch import optim
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data import DataLoader, DistributedSampler
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from model.model_minimind import MiniMindConfig, MiniMindForCausalLM
+from model.lite.rnewmind_base import RNewMindConfig, RNewMindForCausalLM
 from dataset.lm_dataset import SFTDataset
 
 warnings.filterwarnings('ignore')
@@ -148,7 +148,7 @@ def train_epoch(epoch, wandb, alpha=0.0, temperature=1.0):
 
 def init_student_model(lm_config):
     tokenizer = AutoTokenizer.from_pretrained('../model/')
-    model = MiniMindForCausalLM(lm_config)
+    model = RNewMindForCausalLM(lm_config)
     moe_path = '_moe' if lm_config.use_moe else ''
     ckp = f'{args.save_dir}/full_sft_{lm_config.hidden_size}{moe_path}.pth'
     state_dict = torch.load(ckp, map_location=args.device)
@@ -160,7 +160,7 @@ def init_student_model(lm_config):
 
 
 def init_teacher_model(lm_config):
-    model = MiniMindForCausalLM(lm_config)
+    model = RNewMindForCausalLM(lm_config)
     moe_path = '_moe' if lm_config.use_moe else ''
     ckp = f'{args.save_dir}/full_sft_{lm_config.hidden_size}{moe_path}.pth'
     state_dict = torch.load(ckp, map_location=args.device)
@@ -183,7 +183,7 @@ def init_distributed_mode():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="MiniMind Full SFT")
+    parser = argparse.ArgumentParser(description="RNewMind Full SFT")
     parser.add_argument("--out_dir", type=str, default="../out")
     parser.add_argument("--epochs", type=int, default=6)
     parser.add_argument("--batch_size", type=int, default=32)
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--dtype", type=str, default="bfloat16")
     parser.add_argument("--use_wandb", action="store_true")
-    parser.add_argument("--wandb_project", type=str, default="MiniMind-Full-SFT")
+    parser.add_argument("--wandb_project", type=str, default="RNewMind-Full-SFT")
     parser.add_argument("--num_workers", type=int, default=1)
     parser.add_argument("--ddp", action="store_true")
     parser.add_argument("--accumulation_steps", type=int, default=1)
@@ -205,15 +205,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # 定义学生模型和教师模型
-    lm_config_student = MiniMindConfig(hidden_size=512, num_hidden_layers=8)
-    lm_config_teacher = MiniMindConfig(hidden_size=768, num_hidden_layers=16)
+    lm_config_student = RNewMindConfig(hidden_size=512, num_hidden_layers=8)
+    lm_config_teacher = RNewMindConfig(hidden_size=768, num_hidden_layers=16)
     args.save_dir = os.path.join(args.out_dir)
     os.makedirs(args.save_dir, exist_ok=True)
     os.makedirs(args.out_dir, exist_ok=True)
     tokens_per_iter = args.batch_size * args.max_seq_len
     device_type = "cuda" if "cuda" in args.device else "cpu"
 
-    args.wandb_run_name = f"MiniMind-Dist-SFT-Epoch-{args.epochs}-BatchSize-{args.batch_size}-LearningRate-{args.learning_rate}"
+    args.wandb_run_name = f"RNewMind-Dist-SFT-Epoch-{args.epochs}-BatchSize-{args.batch_size}-LearningRate-{args.learning_rate}"
 
     ctx = nullcontext() if device_type == "cpu" else torch.cuda.amp.autocast()
     ddp = int(os.environ.get("RANK", -1)) != -1  # is this a ddp run?

@@ -6,16 +6,16 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import torch
 import warnings
 from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaConfig, LlamaForCausalLM
-from model.model_minimind import MiniMindConfig, MiniMindForCausalLM
+from model.lite.rnewmind_base import RNewMindConfig, RNewMindForCausalLM
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
 
 # MoE模型需使用此函数转换
 def convert_torch2transformers_minimind(torch_path, transformers_path, dtype=torch.bfloat16):
-    MiniMindConfig.register_for_auto_class()
-    MiniMindForCausalLM.register_for_auto_class("AutoModelForCausalLM")
-    lm_model = MiniMindForCausalLM(lm_config)
+    RNewMindConfig.register_for_auto_class()
+    RNewMindForCausalLM.register_for_auto_class("AutoModelForCausalLM")
+    lm_model = RNewMindForCausalLM(lm_config)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     state_dict = torch.load(torch_path, map_location=device)
     lm_model.load_state_dict(state_dict, strict=False)
@@ -25,7 +25,7 @@ def convert_torch2transformers_minimind(torch_path, transformers_path, dtype=tor
     lm_model.save_pretrained(transformers_path, safe_serialization=False)
     tokenizer = AutoTokenizer.from_pretrained('../model/')
     tokenizer.save_pretrained(transformers_path)
-    print(f"模型已保存为 Transformers-MiniMind 格式: {transformers_path}")
+    print(f"模型已保存为 Transformers-RNewMind 格式: {transformers_path}")
 
 
 # LlamaForCausalLM结构兼容第三方生态
@@ -62,7 +62,7 @@ def convert_transformers2torch(transformers_path, torch_path):
 
 
 if __name__ == '__main__':
-    lm_config = MiniMindConfig(hidden_size=768, num_hidden_layers=16, max_seq_len=8192, use_moe=False)
+    lm_config = RNewMindConfig(hidden_size=768, num_hidden_layers=16, max_seq_len=8192, use_moe=False)
 
     torch_path = f"../out/full_sft_{lm_config.hidden_size}{'_moe' if lm_config.use_moe else ''}.pth"
 

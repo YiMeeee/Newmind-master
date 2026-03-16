@@ -1,4 +1,4 @@
-# NewMind
+# RNewiMind
 
 轻量级大语言模型，从零实现完整的 Transformer 架构及训练流程。
 
@@ -19,7 +19,7 @@
 
 ## 模型架构
 
-NewMind 采用 Decoder-Only Transformer 架构，核心配置如下：
+RNewMind 采用 Decoder-Only Transformer 架构，核心配置如下：
 
 | 参数 | Small (26M) | Standard (104M) | MoE (145M) |
 |------|-------------|-----------------|------------|
@@ -74,14 +74,26 @@ NewMind 采用 Decoder-Only Transformer 架构，核心配置如下：
 ## 项目结构
 
 ```
-Newmind/
+minimind/
 ├── model/                      # 模型定义
-│   ├── model_minimind.py       # 核心 Transformer 架构
+│   ├── lite/                   # 核心模型实现
+│   │   └── rnewmind_base.py    # RNewMind 架构定义
+│   ├── core/                   # 基础组件
+│   │   ├── attention.py        # 注意力机制
+│   │   ├── norm.py             # RMSNorm 归一化
+│   │   ├── rope.py             # 旋转位置编码
+│   │   ├── feedforward.py      # 前馈网络
+│   │   └── moe.py              # MoE 前馈网络
+│   ├── config/                 # 模型配置
+│   ├── model_minimind.py       # 兼容性导出
 │   ├── model_lora.py           # LoRA 适配器实现
-│   └── tokenizer.json          # 分词器配置 (6400 tokens)
+│   ├── tokenizer.json          # 分词器配置 (6400 tokens)
+│   └── tokenizer_config.json   # 分词器配置
 ├── dataset/                    # 数据处理
+│   ├── __init__.py
 │   └── lm_dataset.py           # Pretrain/SFT/DPO/RLAIF 数据集
 ├── trainer/                    # 训练脚本
+│   ├── engine.py               # 训练引擎
 │   ├── train_pretrain.py       # 预训练
 │   ├── train_full_sft.py       # 全量 SFT
 │   ├── train_lora.py           # LoRA 微调
@@ -91,9 +103,16 @@ Newmind/
 ├── scripts/                    # 工具脚本
 │   ├── web_demo.py             # Streamlit Web 界面
 │   ├── serve_openai_api.py     # OpenAI 兼容 API 服务
-│   └── convert_model.py        # 模型格式转换
-├── eval_model.py               # 模型推理/评估
-└── requirements.txt            # 依赖列表
+│   ├── chat_openai_api.py      # OpenAI API 调用示例
+│   ├── convert_model.py        # 模型格式转换
+│   └── train_tokenizer.py      # 分词器训练
+├── evaluation/                 # 评估脚本
+├── inference/                  # 推理脚本
+├── eval_model.py               # 模型推理/评估入口
+├── requirements.txt            # 依赖列表
+├── 训练手册.md                  # 详细训练文档
+├── 所使用的模型.md              # 模型架构详解
+└── README.md                   # 项目说明
 ```
 
 ---
@@ -127,8 +146,7 @@ pip install -r requirements.txt
 
 ### 2. 下载预训练模型
 
-从 HuggingFace 或 ModelScope 下载权重文件至 `./out/` 目录：
-
+从 HuggingFace 或 ModelScope 下载权重文件至 `./out/` 目录。
 
 ### 3. 推理测试
 
@@ -142,9 +160,27 @@ python eval_model.py --model_mode 2
 # 测试推理模型 (CoT)
 python eval_model.py --model_mode 3
 
+# 测试 RLAIF 模型
+python eval_model.py --model_mode 4
+
 # 使用 LoRA 领域适配
 python eval_model.py --lora_name lora_medical --model_mode 2
 ```
+
+### 推理参数说明
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--model_mode` | 1 | 0: 预训练，1: SFT-Chat，2: RLHF-Chat，3: Reason，4: RLAIF-Chat |
+| `--hidden_size` | 512 | 隐藏层维度 (512=Small, 768=Standard, 640=MoE) |
+| `--num_hidden_layers` | 8 | Transformer 层数 |
+| `--use_moe` | False | 是否启用 MoE 架构 |
+| `--max_seq_len` | 8192 | 最大生成长度 |
+| `--history_cnt` | 0 | 携带历史对话条数（需为偶数） |
+| `--temperature` | 0.85 | 采样温度 |
+| `--top_p` | 0.85 | Top-P 采样阈值 |
+| `--lora_name` | None | LoRA 适配器名称 |
+| `--load` | 0 | 0: 原生 PyTorch 权重，1: Transformers 格式 |
 
 ---
 
@@ -223,6 +259,10 @@ python train_lora.py \
 python eval_model.py --model_mode 1
 ```
 
+支持两种模式：
+- `[0] 自动测试`: 使用预设问题批量测试
+- `[1] 手动输入`: 交互式对话
+
 ### API 服务
 
 启动 OpenAI 兼容 API：
@@ -258,22 +298,36 @@ streamlit run scripts/web_demo.py
 
 ### 完整依赖列表
 
+完整依赖请参见 `requirements.txt`，核心依赖如下：
+
 ```txt
 torch==2.2.2
+torchvision==0.17.2
 transformers==4.48.0
 datasets==2.21.0
 trl==0.13.0
 peft==0.7.1
 tiktoken==0.5.1
 streamlit==1.30.0
+openai==1.59.6
 ```
 
 ### 快速安装
 
 ```bash
+# 安装 PyTorch (CUDA 11.8)
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
+# 安装其他依赖（使用清华镜像源）
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
+
+---
+
+## 相关文档
+
+- **[训练手册.md](训练手册.md)**: 详细训练流程和各脚本使用说明
+- **[所使用的模型.md](所使用的模型.md)**: 模型架构、数学原理和参数详解
 
 ---
 

@@ -3,7 +3,7 @@ import random
 import warnings
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextStreamer
-from model.model_minimind import MiniMindConfig, MiniMindForCausalLM
+from model.lite.rnewmind_base import RNewMindConfig, RNewMindForCausalLM
 from model.model_lora import *
 
 warnings.filterwarnings('ignore')
@@ -16,7 +16,7 @@ def init_model(args):
         modes = {0: 'pretrain', 1: 'full_sft', 2: 'rlhf', 3: 'reason', 4: 'grpo'}
         ckp = f'./{args.out_dir}/{modes[args.model_mode]}_{args.hidden_size}{moe_path}.pth'
 
-        model = MiniMindForCausalLM(MiniMindConfig(
+        model = RNewMindForCausalLM(RNewMindConfig(
             hidden_size=args.hidden_size,
             num_hidden_layers=args.num_hidden_layers,
             use_moe=args.use_moe
@@ -31,7 +31,7 @@ def init_model(args):
         transformers_model_path = './MiniMind2'
         tokenizer = AutoTokenizer.from_pretrained(transformers_model_path)
         model = AutoModelForCausalLM.from_pretrained(transformers_model_path, trust_remote_code=True)
-    print(f'MiniMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
+    print(f'RNewMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
     return model.eval().to(args.device), tokenizer
 
 
@@ -97,7 +97,7 @@ def setup_seed(seed):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Chat with MiniMind")
+    parser = argparse.ArgumentParser(description="Chat with RNewMind")
     parser.add_argument('--lora_name', default='None', type=str)
     parser.add_argument('--out_dir', default='out', type=str)
     parser.add_argument('--temperature', default=0.85, type=float)
