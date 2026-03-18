@@ -27,10 +27,20 @@ def init_model(args):
         if args.lora_name != 'None':
             apply_lora(model)
             load_lora(model, f'./{args.out_dir}/lora/{args.lora_name}_{args.hidden_size}.pth')
+    #else:
+    #    transformers_model_path = './MiniMind2'
+    #    tokenizer = AutoTokenizer.from_pretrained(transformers_model_path)
+    #    model = AutoModelForCausalLM.from_pretrained(transformers_model_path, trust_remote_code=True)
     else:
-        transformers_model_path = './MiniMind2'
+    # 修改为从 models 目录加载
+        transformers_model_path = f'./models/{args.model_name}'  # 新增 --model_name 参数
         tokenizer = AutoTokenizer.from_pretrained(transformers_model_path)
-        model = AutoModelForCausalLM.from_pretrained(transformers_model_path, trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(
+        transformers_model_path, 
+        trust_remote_code=True,
+        torch_dtype=torch.float16,  # 3050 用 FP16
+        device_map='cuda'  # 直接加载到 GPU
+    )
     print(f'RNewMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
     return model.eval().to(args.device), tokenizer
 
@@ -118,6 +128,9 @@ def main():
     parser.add_argument('--load', default=0, type=int, help="0: 原生torch权重，1: transformers加载")
     parser.add_argument('--model_mode', default=1, type=int,
                         help="0: 预训练模型，1: SFT-Chat模型，2: RLHF-Chat模型，3: Reason模型，4: RLAIF-Chat模型")
+    parser.add_argument('--model_name', default='RNewMind', type=str,
+                    help="HuggingFace 模型名称，位于 models/ 目录下")
+
     args = parser.parse_args()
 
     model, tokenizer = init_model(args)
