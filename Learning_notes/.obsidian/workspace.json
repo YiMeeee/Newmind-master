@@ -14,12 +14,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "TRAINING_GUIDE.md",
+                "file": "Dataset.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TRAINING_GUIDE"
+              "title": "Dataset"
             }
           }
         ]
@@ -203,8 +203,8 @@
   },
   "active": "430ad42936ff0a60",
   "lastOpenFiles": [
-    "Dataset.md",
     "TRAINING_GUIDE.md",
+    "Dataset.md",
     "训练过程.md",
     "欢迎.md"
   ]

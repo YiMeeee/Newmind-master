@@ -28,6 +28,6 @@ wandb==0.18.3
 streamlit==1.30.0
 torch==2.2.2
 torchvision==0.17.2
-tokenizers==0.19.1
+tokenizers>=0.21,<0.22
 fastapi==0.115.0
 uvicorn==0.30.6
