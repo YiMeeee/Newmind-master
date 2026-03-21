@@ -34,17 +34,16 @@ def logits_to_probs(logits, labels):
     # logits shape: (batch_size, seq_len, vocab_size)
     # labels shape: (batch_size, seq_len)
     # probs shape: (batch_size, seq_len)
-    log_probs = F.log_softmax(logits, hidden_size=2)
-    probs = torch.gather(log_probs, hidden_size=2, index=labels.unsqueeze(2)).squeeze(-1)
+    log_probs = F.log_softmax(logits, dim=2)
+    probs = torch.gather(log_probs, dim=2, index=labels.unsqueeze(2)).squeeze(-1)
     return probs
 
 
 def dpo_loss(ref_probs, probs, mask, beta):
     # ref_probs 和 probs 都是 shape: (batch_size, seq_len)
-    # https://github.com/jingyaogong/minimind/issues/298
-    seq_lengths = mask.sum(hidden_size=1, keephidden_size=True)  # (batch_size, 1)
-    ref_probs = (ref_probs * mask).sum(hidden_size=1) / seq_lengths.squeeze()
-    probs = (probs * mask).sum(hidden_size=1) / seq_lengths.squeeze()
+    seq_lengths = mask.sum(dim=1, keepdim=True)  # (batch_size, 1)
+    ref_probs = (ref_probs * mask).sum(dim=1) / seq_lengths.squeeze()
+    probs = (probs * mask).sum(dim=1) / seq_lengths.squeeze()
 
     # 将 chosen 和 rejected 数据分开
     batch_size = ref_probs.shape[0]
@@ -69,9 +68,9 @@ def train_epoch(epoch, wandb):
         y_rejected = batch['y_rejected'].to(args.device)
         mask_chosen = batch['mask_chosen'].to(args.device)
         mask_rejected = batch['mask_rejected'].to(args.device)
-        x = torch.cat([x_chosen, x_rejected], hidden_size=0)
-        y = torch.cat([y_chosen, y_rejected], hidden_size=0)
-        mask = torch.cat([mask_chosen, mask_rejected], hidden_size=0)
+        x = torch.cat([x_chosen, x_rejected], dim=0)
+        y = torch.cat([y_chosen, y_rejected], dim=0)
+        mask = torch.cat([mask_chosen, mask_rejected], dim=0)
 
         lr = get_lr(epoch * iter_per_epoch + step, args.epochs * iter_per_epoch, args.learning_rate)
         for param_group in optimizer.param_groups:

@@ -140,7 +140,6 @@ RNewMind/
 │   │   ├── __init__.py
 │   │   ├── config_lite.py          # Lite 预设字典
 │   │   └── config_pro.py           # Pro 预设字典
-│   ├── model_minimind.py           # 向后兼容 shim（MiniMind* 别名）
 │   └── model_lora.py               # LoRA 适配器
 ├── dataset/
 │   └── lm_dataset.py               # Pretrain / SFT / DPO / RLAIF 数据集
@@ -607,26 +606,6 @@ for r in results:
 ```
 
 ---
-
-## 向后兼容说明
-
-原 MiniMind 代码**无需任何修改**即可继续使用，旧类名通过 `model/model_minimind.py` shim 重定向到新实现：
-
-```python
-# 旧写法（仍然有效）
-from model.model_minimind import MiniMindConfig, MiniMindForCausalLM
-
-# 新写法（推荐）
-from model.lite.rnewmind_base import RNewMindConfig, RNewMindForCausalLM
-```
-
-| 旧类名 | 新类名 |
-|--------|--------|
-| `MiniMindConfig` | `RNewMindConfig` |
-| `MiniMindForCausalLM` | `RNewMindForCausalLM` |
-| `MiniMindModel` | `RNewMindModel` |
-| `MiniMindBlock` | `RNewMindBlock` |
-| `model_type = "minimind"` | `model_type = "rnewmind"` |
 
 ---
 

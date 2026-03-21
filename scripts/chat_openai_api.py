@@ -12,7 +12,7 @@
 #     query = input('[Q]: ')
 #     conversation_history.append({"role": "user", "content": query})
 #     response = client.chat.completions.create(
-#         model="minimind",
+#         model="rnewmind",
 #         messages=conversation_history[-history_messages_num:],
 #         stream=stream
 #     )

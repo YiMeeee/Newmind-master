@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import streamlit as st
 
-st.set_page_config(page_title="MiniMind", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="RNewMind", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -118,7 +118,7 @@ def init_chat_messages():
     if "messages" in st.session_state:
         for i, message in enumerate(st.session_state.messages):
             if message["role"] == "assistant":
-                with st.chat_message("assistant", avatar=image_url):
+                with st.chat_message("assistant"):
                     st.markdown(process_assistant_content(message["content"]), unsafe_allow_html=True)
                     if st.button("🗑", key=f"delete_{i}"):
                         st.session_state.messages.pop(i)
@@ -163,29 +163,28 @@ model_source = st.sidebar.radio("选择模型来源", ["本地模型", "API"], i
 
 if model_source == "API":
     api_url = st.sidebar.text_input("API URL", value="http://127.0.0.1:8000/v1")
-    api_model_id = st.sidebar.text_input("Model ID", value="minimind")
-    api_model_name = st.sidebar.text_input("Model Name", value="MiniMind2")
+    api_model_id = st.sidebar.text_input("Model ID", value="rnewmind")
+    api_model_name = st.sidebar.text_input("Model Name", value="RNewMind")
     api_key = st.sidebar.text_input("API Key", value="none", type="password")
     slogan = f"Hi, I'm {api_model_name}"
 else:
     MODEL_PATHS = {
-        "MiniMind2-R1 (0.1B)": ["../MiniMind2-R1", "MiniMind2-R1"],
-        "MiniMind2-Small-R1 (0.02B)": ["../MiniMind2-Small-R1", "MiniMind2-Small-R1"],
-        "MiniMind2 (0.1B)": ["../MiniMind2", "MiniMind2"],
-        "MiniMind2-MoE (0.15B)": ["../MiniMind2-MoE", "MiniMind2-MoE"],
-        "MiniMind2-Small (0.02B)": ["../MiniMind2-Small", "MiniMind2-Small"]
+        "RNewMind-R1 (0.1B)": ["../RNewMind-R1", "RNewMind-R1"],
+        "RNewMind-Small-R1 (0.02B)": ["../RNewMind-Small-R1", "RNewMind-Small-R1"],
+        "RNewMind (0.1B)": ["../RNewMind", "RNewMind"],
+        "RNewMind-MoE (0.15B)": ["../RNewMind-MoE", "RNewMind-MoE"],
+        "RNewMind-Small (0.02B)": ["../RNewMind-Small", "RNewMind-Small"]
     }
 
-    selected_model = st.sidebar.selectbox('Models', list(MODEL_PATHS.keys()), index=2)  # 默认选择 MiniMind2
+    selected_model = st.sidebar.selectbox('Models', list(MODEL_PATHS.keys()), index=2)  # 默认选择 RNewMind
     model_path = MODEL_PATHS[selected_model][0]
     slogan = f"Hi, I'm {MODEL_PATHS[selected_model][1]}"
 
-image_url = "https://www.modelscope.cn/api/v1/studio/gongjy/MiniMind/repo?Revision=master&FilePath=images%2Flogo2.png&View=true"
+image_url = None
 
 st.markdown(
     f'<div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0; padding: 0;">'
     '<div style="font-style: italic; font-weight: 900; margin: 0; padding-top: 4px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%;">'
-    f'<img src="{image_url}" style="width: 45px; height: 45px; "> '
     f'<span style="font-size: 26px; margin-left: 10px;">{slogan}</span>'
     '</div>'
     '<span style="color: #bbb; font-style: italic; margin-top: 6px; margin-bottom: 10px;">内容完全由AI生成，请务必仔细甄别<br>Content AI-generated, please discern with care</span>'
@@ -218,7 +217,7 @@ def main():
 
     for i, message in enumerate(messages):
         if message["role"] == "assistant":
-            with st.chat_message("assistant", avatar=image_url):
+            with st.chat_message("assistant"):
                 st.markdown(process_assistant_content(message["content"]), unsafe_allow_html=True)
                 if st.button("×", key=f"delete_{i}"):
                     st.session_state.messages = st.session_state.messages[:i - 1]
@@ -229,7 +228,7 @@ def main():
                 f'<div style="display: flex; justify-content: flex-end;"><div style="display: inline-block; margin: 10px 0; padding: 8px 12px 8px 12px;  background-color: gray; border-radius: 10px; color:white; ">{message["content"]}</div></div>',
                 unsafe_allow_html=True)
 
-    prompt = st.chat_input(key="input", placeholder="给 MiniMind 发送消息")
+    prompt = st.chat_input(key="input", placeholder="给 RNewMind 发送消息")
 
     if hasattr(st.session_state, 'regenerate') and st.session_state.regenerate:
         prompt = st.session_state.last_user_message

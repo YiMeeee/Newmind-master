@@ -150,7 +150,7 @@ mkdir -p out dataset
 ```bash
 cd /Users/renjiapin/Documents/GitHub/Newmind-master/dataset
 
-# 从 MiniMind 数据集下载（推荐）
+# 从 HuggingFace 数据集下载（推荐）
 wget https://huggingface.co/datasets/jingyaogong/minimind_dataset/resolve/main/pretrain_hq.jsonl
 wget https://huggingface.co/datasets/jingyaogong/minimind_dataset/resolve/main/sft_mini_512.jsonl -O sft_512.jsonl
 wget https://huggingface.co/datasets/jingyaogong/minimind_dataset/resolve/main/dpo.jsonl

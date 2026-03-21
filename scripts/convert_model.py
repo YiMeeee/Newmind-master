@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 
 
 # MoE模型需使用此函数转换
-def convert_torch2transformers_minimind(torch_path, transformers_path, dtype=torch.bfloat16):
+def convert_torch2transformers_rnewmind(torch_path, transformers_path, dtype=torch.bfloat16):
     RNewMindConfig.register_for_auto_class()
     RNewMindForCausalLM.register_for_auto_class("AutoModelForCausalLM")
     lm_model = RNewMindForCausalLM(lm_config)
@@ -66,9 +66,9 @@ if __name__ == '__main__':
 
     torch_path = f"../out/full_sft_{lm_config.hidden_size}{'_moe' if lm_config.use_moe else ''}.pth"
 
-    transformers_path = '../MiniMind2'
+    transformers_path = '../RNewMind'
 
-    convert_torch2transformers_minimind(torch_path, transformers_path)
+    convert_torch2transformers_rnewmind(torch_path, transformers_path)
 
     # # # convert transformers to torch model
     # # convert_transformers2torch(transformers_path, torch_path)

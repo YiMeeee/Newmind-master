@@ -28,7 +28,7 @@ def init_model(args):
             apply_lora(model)
             load_lora(model, f'./{args.out_dir}/lora/{args.lora_name}_{args.hidden_size}.pth')
     #else:
-    #    transformers_model_path = './MiniMind2'
+    #    transformers_model_path = './RNewMind'
     #    tokenizer = AutoTokenizer.from_pretrained(transformers_model_path)
     #    model = AutoModelForCausalLM.from_pretrained(transformers_model_path, trust_remote_code=True)
     else:
@@ -114,9 +114,9 @@ def main():
     parser.add_argument('--top_p', default=0.85, type=float)
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu', type=str)
     # 此处max_seq_len（最大输出长度）并不意味模型具有对应的长文本的性能，仅防止QA出现被截断的问题
-    # MiniMind2-moe (145M)：(hidden_size=640, num_hidden_layers=8, use_moe=True)
-    # MiniMind2-Small (26M)：(hidden_size=512, num_hidden_layers=8)
-    # MiniMind2 (104M)：(hidden_size=768, num_hidden_layers=16)
+    # RNewMind-MoE (145M)：(hidden_size=640, num_hidden_layers=8, use_moe=True)
+    # RNewMind-Small (26M)：(hidden_size=512, num_hidden_layers=8)
+    # RNewMind (104M)：(hidden_size=768, num_hidden_layers=16)
     parser.add_argument('--hidden_size', default=512, type=int)
     parser.add_argument('--num_hidden_layers', default=8, type=int)
     parser.add_argument('--max_seq_len', default=8192, type=int)

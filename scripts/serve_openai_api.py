@@ -41,7 +41,7 @@ def init_model(args):
             apply_lora(model)
             load_lora(model, f'../{args.out_dir}/{args.lora_name}_{args.hidden_size}.pth')
     else:
-        model_path = '../MiniMind2'
+        model_path = '../RNewMind'
         model = AutoModelForCausalLM.from_pretrained(model_path, trust_remote_code=True)
         tokenizer = AutoTokenizer.from_pretrained(model_path)
     print(f'RNewMind模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
@@ -148,7 +148,7 @@ async def chat_completions(request: ChatRequest):
                 "id": f"chatcmpl-{int(time.time())}",
                 "object": "chat.completion",
                 "created": int(time.time()),
-                "model": "minimind",
+                "model": "rnewmind",
                 "choices": [
                     {
                         "index": 0,
