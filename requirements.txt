@@ -31,3 +31,4 @@ torchvision==0.17.2
 tokenizers>=0.21,<0.22
 fastapi==0.115.0
 uvicorn==0.30.6
+huggingface_hub==0.14.1
